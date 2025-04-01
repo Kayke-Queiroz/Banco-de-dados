@@ -1,5 +1,8 @@
--- Criando o banco de dados
-CREATE DATABASE IF NOT EXISTS EstacionamentoIDP;
+-- Criando o banco de dados com suporte a UTF-8
+CREATE DATABASE IF NOT EXISTS EstacionamentoIDP 
+CHARACTER SET utf8mb4 
+COLLATE utf8mb4_unicode_ci;
+
 USE EstacionamentoIDP;
 
 -- Criando a tabela Corpo_Docente
@@ -9,7 +12,7 @@ CREATE TABLE IF NOT EXISTS Corpo_Docente (
     CPF VARCHAR(14) NOT NULL UNIQUE,
     Numero VARCHAR(20) NOT NULL,
     Email VARCHAR(100) NOT NULL UNIQUE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Criando a tabela Veículo
 CREATE TABLE IF NOT EXISTS Veiculo (
@@ -19,34 +22,19 @@ CREATE TABLE IF NOT EXISTS Veiculo (
     Modelo VARCHAR(50) NOT NULL,
     Cor VARCHAR(20) NOT NULL,
     FOREIGN KEY (DocenteID) REFERENCES Corpo_Docente(DocenteID) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Criando a tabela Vaga
 CREATE TABLE IF NOT EXISTS Vaga (
     VagaID INT AUTO_INCREMENT PRIMARY KEY,
     Numero INT NOT NULL UNIQUE,
     Localizacao VARCHAR(50) NOT NULL,
-    Status ENUM('Disponível', 'Ocupada') NOT NULL DEFAULT 'Disponível'
-);
-
--- TABELA DE RESERVAS (ANTIGA) - DESATIVADA
-/*
-CREATE TABLE IF NOT EXISTS Estacionamento (
-    ReservaID INT AUTO_INCREMENT PRIMARY KEY,
-    DocenteID INT NOT NULL,
-    VeiculoID INT NOT NULL,
-    VagaID INT NOT NULL,
-    DataReserva DATE NOT NULL,
-    HorarioEntrada TIME NOT NULL,
-    HorarioSaida TIME NOT NULL,
-    Preco DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    Desconto DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-    Status ENUM('Reservado', 'Cancelado', 'Concluído') NOT NULL DEFAULT 'Reservado',
-    FOREIGN KEY (DocenteID) REFERENCES Corpo_Docente(DocenteID) ON DELETE CASCADE,
-    FOREIGN KEY (VeiculoID) REFERENCES Veiculo(VeiculoID) ON DELETE CASCADE,
-    FOREIGN KEY (VagaID) REFERENCES Vaga(VagaID) ON DELETE CASCADE
-);
-*/
+    Status ENUM('Disponível', 'Ocupada') NOT NULL DEFAULT 'Disponível',
+    DocenteID INT NULL,
+    VeiculoID INT NULL,
+    FOREIGN KEY (DocenteID) REFERENCES Corpo_Docente(DocenteID) ON DELETE SET NULL,
+    FOREIGN KEY (VeiculoID) REFERENCES Veiculo(VeiculoID) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Criando a nova tabela de tags de estacionamento
 CREATE TABLE IF NOT EXISTS tag_estacionamento (
@@ -54,8 +42,10 @@ CREATE TABLE IF NOT EXISTS tag_estacionamento (
     DocenteID INT NOT NULL,
     Tag VARCHAR(50) UNIQUE NOT NULL,
     Status ENUM('Ativa', 'Inativa') NOT NULL DEFAULT 'Ativa',
+    DataAtivacao DATE,
+    DataDesativacao DATE NULL,
     FOREIGN KEY (DocenteID) REFERENCES Corpo_Docente(DocenteID) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Criando a tabela de pagamentos (atualizada)
 CREATE TABLE IF NOT EXISTS Pagamento (
@@ -66,11 +56,11 @@ CREATE TABLE IF NOT EXISTS Pagamento (
     FormaPagamento ENUM('Visa', 'Mastercard', 'Boleto', 'Pix') NOT NULL,
     isencao_visa BOOLEAN DEFAULT FALSE, -- Indica se o professor tem gratuidade de 6 meses
     FOREIGN KEY (DocenteID) REFERENCES Corpo_Docente(DocenteID) ON DELETE CASCADE
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Inserindo dados na tabela Corpo_Docente
 INSERT INTO Corpo_Docente (Nome, CPF, Numero, Email) VALUES
-('João Silva', '123.456.789-00', '12345', 'joao.silva@idp.edu.br'),
+('João Silva', '123.456.789-00', '12345', 'joão.silva@idp.edu.br'),  -- Note o acento em João
 ('Maria Oliveira', '234.567.890-11', '67890', 'maria.oliveira@idp.edu.br');
 
 -- Inserindo dados na tabela Veiculo
@@ -79,14 +69,14 @@ INSERT INTO Veiculo (DocenteID, Placa, Modelo, Cor) VALUES
 (2, 'XYZ5678', 'Palio', 'Preto');
 
 -- Inserindo dados na tabela Vaga
-INSERT INTO Vaga (Numero, Localizacao, Status) VALUES
-(1, 'Bloco A - Térreo', 'Disponível'),
-(2, 'Bloco B - Primeiro andar', 'Ocupada');
+INSERT INTO Vaga (Numero, Localizacao, Status, DocenteID, VeiculoID) VALUES
+(1, 'Bloco A - Térreo', 'Disponível', NULL, NULL),
+(2, 'Bloco B - Primeiro andar', 'Ocupada', 1, 1);
 
 -- Inserindo dados na tabela tag_estacionamento
-INSERT INTO tag_estacionamento (DocenteID, Tag, Status) VALUES
-(1, 'TAG1234', 'Ativa'),
-(2, 'TAG5678', 'Inativa');
+INSERT INTO tag_estacionamento (DocenteID, Tag, Status, DataAtivacao) VALUES
+(1, 'TAG1234', 'Ativa', '2025-01-15'),
+(2, 'TAG5678', 'Inativa', '2025-02-01');
 
 -- Inserindo dados na tabela Pagamento
 INSERT INTO Pagamento (DocenteID, Valor, DataPagamento, FormaPagamento, isencao_visa) VALUES
