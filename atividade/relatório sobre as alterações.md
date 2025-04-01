@@ -1,8 +1,8 @@
 # RELATÓRIO DE ATUALIZAÇÃO - SISTEMA DE ESTACIONAMENTO IDP  
 **Data**: 05/06/2024  
 **Equipe**: Banco de Dados IDP  
-aluno: kayke queiroz dos santos 
-ra:24101284
+aluno: kayke queiroz dos santos, Marcelo da Silva Mello 
+ra:24101284, 2211257
 
 ---
 
